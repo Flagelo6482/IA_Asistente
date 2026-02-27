@@ -1,0 +1,17 @@
+Tareas pendientes
+crear script para comenzar el env:
+
+
+
+Activar el env:
+.\frank_env\Scripts\activate
+
+
+Librerias instaladas:
+pip install psycopg2-binary : Para conectar Python con PostgreSQL (pgAdmin).
+google-generativeai : La API oficial para usar Gemini.
+python-dotenv : Para guardar tus contraseñas y llaves de API de forma segura.
+SpeechRecognition PyAudio : Para capturar tu voz.
+pyttsx3: Para que Frank pueda hablarte (Texto a voz offline).
+pywhatkit: diseñada precisamente para automatizar tareas sencillas como buscar y reproducir
+ videos con un solo comando.
