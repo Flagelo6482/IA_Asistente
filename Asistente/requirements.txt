@@ -1,0 +1,9 @@
+psycopg2-binary
+google-generativeai
+python-dotenv
+SpeechRecognition
+PyAudio
+pyttsx3
+pywhatkit
+schedule
+pipwin

@@ -1,0 +1,25 @@
+Paso 1: El "Cerebro" en tu RTX 3060 Ti (Hoy)
+Instala Ollama y descarga el modelo. Con tus 8 GB de VRAM, el modelo llama3 o mistral volará.
+
+Prueba de fuego: Pídele que analice tu meta de 69 kg y 1.80 m. Si te responde en menos de 2 segundos, tu hardware está perfectamente configurado.
+
+Paso 2: Las "Manos" (Automatización)
+Para que Frank no solo hable, sino que actúe, crea un archivo llamado acciones.py donde agrupes las funciones:
+
+Música: Usa webbrowser o la API de Spotify para que al detectar la intención, Frank abra tu playlist de entrenamiento.
+
+Mensajería: Configura pywhatkit para enviar esos avisos de dieta por WhatsApp.
+
+Paso 3: La "Estructura" (Base de Datos Pro)
+En pgAdmin, expande lo que ya hicimos. No solo guardes el historial; crea la tabla de Patrones de Usuario:
+
+Si Frank detecta que pides música de Nirvana siempre después de consultar tu peso, esa tabla debe registrar esa relación "Música-Entrenamiento".
+
+Alarmas: Registra la de las 5:20 AM como una tarea prioritaria en tu tabla de recordatorios.
+
+Paso 4: Los "Protocolos" (Códigos Secretos)
+Esto es puro estilo "Jarvis". En tu lógica de Python, antes de enviar el texto al LLM, pon un filtro de "Shortcuts" o "Macros":
+
+Código 001: Al detectar este input, Frank no le pregunta nada a la IA; simplemente ejecuta la función reproducir_playlist(1) y te confirma: "Protocolo 001 activo, Frank. Iniciando música de enfoque".
+
+Esto ahorra tiempo y hace que la interacción se sienta mucho más fluida y privada.

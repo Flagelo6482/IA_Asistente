@@ -6,13 +6,21 @@ import google.generativeai as genai
 import pyttsx3 # Para que Frank hable físicamente
 import webbrowser # Para abrir páginas web si es necesario
 import pywhatkit # Para tareas rápidas como reproducir videos de YouTube
+from langchain_ollama import OllamaLLM
+import pyautogui
+import time
+import ollama
+import subprocess
+import random
 
 
+#Modelo de ollama
+llm_local = OllamaLLM(model="llama3")
 # Cargar configuración
 load_dotenv()
 # Configuración de Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('models/gemini-3-flash-preview')
+#genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+#model = genai.GenerativeModel('models/gemini-3-flash-preview')
 
 # Configuración de Voz (Salida de audio)
 engine = pyttsx3.init()
@@ -42,7 +50,8 @@ def conectar_db():
             host=os.getenv("DB_HOST"),
             database=os.getenv("DB_NAME"),
             user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASS")
+            password=os.getenv("DB_PASS"),
+            client_encoding='utf8'
         )
         return conn
     except Exception as e:
@@ -87,6 +96,23 @@ def guardar_en_historial_completo(comando, respuesta):
         cur.close()
         conn.close()
 
+def obtener_respuesta_ollama(consulta_usuario):
+    # Mantenemos tu prompt de sistema para que no pierda su "esencia"
+    prompt_sistema = (
+        "Eres Frank, un asistente virtual avanzado en Perú. "
+        "Tu usuario es un joven de 24 años (1.80m, 69kg)."
+    )
+    
+    try:
+        # Aquí llamamos a Ollama en lugar de a Google
+        response = ollama.chat(model='llama3', messages=[
+            {'role': 'system', 'content': prompt_sistema},
+            {'role': 'user', 'content': consulta_usuario},
+        ])
+        return response['message']['content']
+    except Exception as e:
+        print(f"Error local de Ollama: {e}")
+        return "Parece que Ollama no está respondiendo en este momento."
 
 # ======================================= #
 # FUNCIONES QUE REALIZARA EL ASISTENTE    #
@@ -113,6 +139,130 @@ def reproducir_en_youtube(busqueda):
         return f"Claro, reproduciendo {busqueda} en YouTube."
     except Exception as e:
         return f"Hubo un error al intentar poner la música: {e}"
+
+def enviar_whatsapp_contacto(alias, mensaje):
+    conn = conectar_db()
+    if conn:
+        cur = conn.cursor()
+        # Esta es la query que busca al 'sonso' en tu tabla agenda_contactos
+        cur.execute("SELECT numero_celular FROM agenda_contactos WHERE nombre_alias = %s", (alias.lower(),))
+        resultado = cur.fetchone()
+        
+        if resultado:
+            numero = resultado[0] # <--- Asegúrate de que esto tenga 12 espacios (sangría)
+            print(f"Frank: Iniciando protocolo de envío para {alias}...")
+            
+            # 1. Abrimos el chat y escribimos el mensaje
+            # wait_time=15 es ideal para que cargue WhatsApp Web en tu PC GAMER
+            pywhatkit.sendwhatmsg_instantly(numero, mensaje, wait_time=15, tab_close=True)
+            
+            # 2. Pausa de seguridad para que el navegador esté al frente
+            time.sleep(3) 
+            
+            # 3. ¡EL TRUCO DE JARVIS! Simula presionar Enter
+            pyautogui.press('enter')
+            
+            cur.close()
+            conn.close()
+            return f"Orden ejecutada. Mensaje enviado a {alias}."
+        else:
+            cur.close()
+            conn.close()
+            return f"No encontré a '{alias}' en mi agenda de pgAdmin, Frank."
+    return "Error de conexión con la base de datos."
+
+def procesar_comando_whatsapp(comando):
+    # Prompt con "Few-Shot Prompting" (ejemplos) para guiar a Llama 3
+    prompt = (
+        f"Eres un extractor de datos estricto. Analiza: '{comando}'\n\n"
+        "REGLAS:\n"
+        "1. Extrae el NOMBRE del destinatario (sin preposiciones como 'al').\n"
+        "2. Extrae el MENSAJE exacto que el usuario quiere enviar.\n"
+        "3. Responde ÚNICAMENTE en este formato: NOMBRE | MENSAJE\n\n"
+        "EJEMPLOS:\n"
+        "Entrada: 'frank envía un mensaje a mama diciendo hola'\n"
+        "Salida: mama | hola\n\n"
+        "Entrada: 'frank envia un mensaje al sonso diciendo que es un sonso'\n"
+        "Salida: sonso | eres un sonso\n\n"
+        "TU RESPUESTA:"
+    )
+    
+    try:
+        # Usamos .strip() para limpiar espacios vacíos que mande la RTX 3060 Ti
+        respuesta = llm_local.invoke(prompt).strip()
+        print(f"DEBUG - IA Procesó: {respuesta}") 
+        
+        if "|" in respuesta:
+            partes = respuesta.split("|", 1)
+            return partes[0].strip().lower(), partes[1].strip()
+    except Exception as e:
+        print(f"Error en Ollama: {e}")
+    return None, None
+
+# ======================================= #
+# FUNCIONES PARA REPRODUCIR LA MUSICA     #
+# ======================================= #
+def abrir_carpeta_de_musica(clave):
+    conn = conectar_db()
+    if conn:
+        cur = conn.cursor()
+        # Buscamos la ruta usando la clave que detectó Ollama
+        cur.execute("SELECT ruta_carpeta FROM biblioteca_musica WHERE clave_activacion = %s", (clave,))
+        resultado = cur.fetchone()
+        
+        if resultado:
+            ruta = os.path.normpath(resultado[0])
+            hablar(f"Entendido Frank, reproduciendo la lista {clave}.")
+            
+            try:
+                # 2. Listamos archivos y filtramos por mp3 (y otros por si acaso)
+                # Usamos .lower() para que encuentre '.MP3' o '.mp3' por igual
+                extensiones_musicales = ('.mp3', '.mp4', '.wav', '.flac')
+                archivos = [f for f in os.listdir(ruta) if f.lower().endswith(extensiones_musicales)]
+
+                if archivos:
+                    # --- EL TRUCO PARA EL ORDEN ALEATORIO ---
+                    # Desordenamos la lista de nombres de archivos
+                    random.shuffle(archivos)
+                    
+                    # Creamos el archivo de lista de reproducción (.m3u)
+                    playlist_path = os.path.join(ruta, "lista_frank.m3u")
+                    
+                    with open(playlist_path, "w", encoding="utf-8") as f:
+                        for cancion in archivos:
+                            f.write(os.path.join(ruta, cancion) + "\n")
+                    
+                    # Abrimos el archivo de lista de reproducción
+                    os.startfile(playlist_path)
+                    
+                    cur.close()
+                    conn.close()
+                    return f"He preparado la lista {clave} con {len(archivos)} canciones."
+                else:
+                    cur.close()
+                    conn.close()
+                    return "La carpeta existe, pero no encontré archivos .mp3 adentro."
+            
+            except Exception as e:
+                return f"Error al acceder a la carpeta: {e}"
+        else:
+            cur.close()
+            conn.close()
+            return f"No encontré ninguna ruta con la clave '{clave}' en la base de datos."
+    return "Error de conexión con la base de datos."
+
+def extraer_clave_de_musica(clave):
+    prompt = (
+        f"Analiza la orden: '{comando}'. "
+        "El usuario quiere reproducir una lista de música. "
+        "Extrae únicamente el código o clave de la lista (ejemplo: 00, 01, relax). "
+        "Responde solo con la clave, sin puntos ni texto extra."
+    )
+    # Usas tu modelo local para limpiar la orden
+    clave = llm_local.invoke(prompt).strip().lower()
+    return clave
+
+
 
 # BUCLE PRINCIPAL (El programa no se cierra)
 if __name__ == "__main__":
@@ -146,7 +296,30 @@ if __name__ == "__main__":
             comando = frase.replace("frank", "").strip()
             
             if comando:
-                if "reproduce" in comando or "pon la musica de" in comando:
+                # ================================================ #
+                # DETECCIÓN DE INTENCIÓN DE WHATSAPP
+                # ================================================ #
+                if "whatsapp" in comando or "mensaje" in comando or "escríbele a" in comando:
+                    # El "Mozo" (IA) extrae la información
+                    contacto, mensaje_extraido = procesar_comando_whatsapp(comando)
+                    if contacto and mensaje_extraido:
+                        # Ahora enviamos el mensaje que la IA limpió, no el comando original
+                        resultado = enviar_whatsapp_contacto(contacto, mensaje_extraido)
+                        hablar(resultado)
+                    else:
+                        hablar("No pude filtrar los datos del mensaje, Frank.")
+                # ================================================ #
+                # DETECCIÓN PARA REPRODUCIR MUSICA LOCAL >:3
+                # ================================================ #
+                elif "reproduce la lista" in comando or "pon la lista" in comando:
+                    clave_limpia = extraer_clave_de_musica(comando)
+                    print(f"Clave detectada: {clave_limpia}")
+                    resultado = abrir_carpeta_de_musica(clave_limpia)
+                    hablar(resultado)
+                # ================================================ #
+                # DETECCIÓN PARA REPRODUCIR MUSICA EN YOUTUBE
+                # ================================================ #
+                elif "reproduce" in comando or "pon la musica de" in comando:
                     musica = comando.replace("reproduce", "").replace("pon la musica de", "").strip()
                     print(f"Frank: Buscando '{musica}' en Youtube...")
                     #Funcion de YOUTUBE
@@ -154,8 +327,8 @@ if __name__ == "__main__":
                     #Guardamos en HISTORIAL
                     guardar_en_historial_completo(comando, f"Reproduciendo {musica}")
                 else:
-                    respuesta = obtener_respuesta_gemini(comando)
-                    print(f"Frank: {respuesta}")
+                    respuesta = obtener_respuesta_ollama(comando)
+                    hablar(respuesta)
                     guardar_en_historial_completo(comando, respuesta)
             else:
                 print("Frank: ¿Sí? Estoy escuchando.")

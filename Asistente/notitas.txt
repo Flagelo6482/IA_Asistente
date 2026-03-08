@@ -1,10 +1,14 @@
 Tareas pendientes
 crear script para comenzar el env:
 
-
+Creacion de un env:
+python -m venv "frank_env"
 
 Activar el env:
 .\frank_env\Scripts\activate
+
+Descativar env:
+deactivate
 
 
 Librerias instaladas:
@@ -15,3 +19,15 @@ SpeechRecognition PyAudio : Para capturar tu voz.
 pyttsx3: Para que Frank pueda hablarte (Texto a voz offline).
 pywhatkit: diseñada precisamente para automatizar tareas sencillas como buscar y reproducir
  videos con un solo comando.
+
+============================================================
+ EN CASO NO SE PUEDA ACTIVAR EL env
+ ejecutar en powershell como admin:
+ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -> Permite que los scripts creados en tu propia computadora (como el de tu entorno frank_env) se ejecuten sin problemas, pero requiere que los descargados de internet estén firmados.
+============================================================
+Instalar todas las librerias del requirements.txt
+pip install -r requirements.txt
+
+
+
+
