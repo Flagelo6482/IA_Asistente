@@ -7,3 +7,8 @@ pyttsx3
 pywhatkit
 schedule
 pipwin
+langchain-ollama
+ollama
+pyautogui
+edge-tts
+playsound
