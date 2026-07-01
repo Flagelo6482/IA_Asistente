@@ -1,0 +1,79 @@
+======================================================================
+RESUMEN DE CAMBIOS E INTEGRACIÓN - FRANK ASISTENTE VIRTUAL
+Fecha: 2026-07-01
+======================================================================
+
+Este archivo detalla la integración realizada en la base de código tras resolver
+el conflicto de fusión (Merge Conflict) entre tus cambios remotos traídos por Git
+y las optimizaciones de robustez desarrolladas localmente.
+
+----------------------------------------------------------------------
+1. CAMBIOS REMOTOS TRAÍDOS (Tu Git Pull)
+----------------------------------------------------------------------
+Se incorporaron con éxito todos tus nuevos archivos y lógicas del repositorio:
+
+* NUEVA VOZ NEURONAL (edge-tts):
+  Implementado en acciones.py. Frank ahora genera un audio MP3 temporal con voz 
+  humana peruana realista (AlexNeural o CamilaNeural) y lo reproduce. Si no hay 
+  internet, tiene fallback automático a pyttsx3.
+
+* SISTEMA DE MEMORIA DINÁMICA (memoria_usuario):
+  En db.py e ia.py. Permite a Frank recordar gustos, metas y datos personales del
+  usuario a largo plazo insertándolos dinámicamente en el prompt de sistema del LLM.
+
+* GESTIÓN DE TAREAS Y RUTINAS:
+  Estructura e interfaz para registrar pendientes (tareas) y actividades recurrentes
+  (rutinas) en base de datos e inyectarlas al contexto de la IA en tiempo real.
+
+* PLANIFICADOR DE ALARMAS:
+  Uso de la librería 'schedule' para almacenar recordatorios en PostgreSQL 
+  y ejecutarlos en segundo plano durante el ciclo activo del asistente.
+
+* CONFIGURACIÓN CLI Y LOGS:
+  main.py acepta parámetros como '--modo voz' o '--modo texto'. Se guarda una
+  bitácora detallada de depuración en el archivo 'frank.log'.
+
+* PROTOCOLOS RÁPIDOS (protocolos.txt):
+  Sistema de atajos instantáneos que ejecutan acciones de inmediato sin procesar LLM.
+
+----------------------------------------------------------------------
+2. CAMBIOS LOCALES INTEGRADOS (Nuestra Fusión)
+----------------------------------------------------------------------
+Para asegurar que todo funcione sin errores sintácticos o de base de datos,
+fusioné las siguientes lógicas y correcciones críticas:
+
+* RESOLUCIÓN DEL CONFLICTO (main.py):
+  Limpié todos los marcadores de conflicto de Git (<<<<<<<, =======, >>>>>>>).
+  Combiné tu flujo de comandos y bucle de alarmas con nuestras funciones de mapa.
+
+* INTEGRACIÓN DE COMANDOS DEL MAPA (main.py):
+  Inserté las llamadas de control directo en procesar_comando(). Si dices
+  "llévame a Ate" o "limpia el mapa", Frank interactúa en red local con el 
+  proyecto 'peru-security-map' mediante 'actions/map_controller.py'.
+
+* SOLUCIÓN A CONFLICTO DE LLAVE FORÁNEA (db.py):
+  Tu código enviaba categorías del LLM (ej: WHATSAPP, ALARMA, MUSICA_LOCAL) 
+  a historial_interacciones, lo cual quebraba la base de datos por restricciones 
+  de foreign key en cat_intenciones. Añadí un normalizador en db.py que mapea 
+  cualquier categoría a llaves válidas (ej: WHATSAPP_SEND o MUSICA_PEDIDO) antes 
+  de ejecutar el INSERT.
+
+* PERSONALIZACIÓN SIN SALUDOS REPETITIVOS (ia.py):
+  Restauré las reglas del prompt de sistema en ia.py (_PERFIL_BASE) para que Frank 
+  use un tono casual, directo y evite saludos tipo "¡Hola! Como asistente..." 
+  en conversaciones continuas.
+
+* RETROALIMENTACIÓN DE CARGA (main.py):
+  Mantuvimos el mensaje "Frank: Pensando..." en la consola mientras Ollama carga 
+  los modelos pesados en la GPU, evitando que pienses que el asistente se congeló.
+
+* DETECCIÓN DE INTERRUPCIÓN (main.py):
+  En bucle de comandos se invoca a detener_habla() de acciones.py antes de correr 
+  un nuevo comando para cortar la reproducción de voz anterior de forma instantánea.
+
+----------------------------------------------------------------------
+3. ESTADO ACTUAL DEL PROYECTO
+----------------------------------------------------------------------
+El proyecto está 100% libre de conflictos y compila con éxito. 
+Las migraciones SQL que trajiste (001 y 002) añaden los esquemas necesarios 
+para el correcto funcionamiento en pgAdmin 4.

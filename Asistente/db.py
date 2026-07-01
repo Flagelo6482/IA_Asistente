@@ -36,6 +36,31 @@ def obtener_usuario():
 
 
 def guardar_historial(comando, respuesta, intencion="CONSULTA_GENERAL"):
+    # Mapear y normalizar intenciones para cumplir con las restricciones de la clave foránea cat_intenciones
+    mapa_intenciones = {
+        'WHATSAPP': 'WHATSAPP_SEND',
+        'WHATSAPP_SEND': 'WHATSAPP_SEND',
+        'MUSICA_LOCAL': 'MUSICA_PEDIDO',
+        'MUSICA_YOUTUBE': 'MUSICA_PEDIDO',
+        'MUSICA_PEDIDO': 'MUSICA_PEDIDO',
+        'DIETA_CONSULTA': 'DIETA_CONSULTA',
+        'DIETA_LOG': 'DIETA_LOG',
+        'ANIMO_NEGATIVO': 'ANIMO_NEGATIVO',
+        'ARC_FACIAL_CONTROL': 'ARC_FACIAL_CONTROL',
+        'CONSULTA_GENERAL': 'CONSULTA_GENERAL',
+        'CONVERSACION': 'CONSULTA_GENERAL',
+        'ALARMA': 'CONSULTA_GENERAL',
+        'GUARDAR_MEMORIA': 'CONSULTA_GENERAL',
+        'GUARDAR_TAREA': 'CONSULTA_GENERAL',
+        'GUARDAR_RUTINA': 'CONSULTA_GENERAL',
+        'OLVIDAR': 'CONSULTA_GENERAL',
+        'VER_TAREAS': 'CONSULTA_GENERAL',
+        'WEB': 'CONSULTA_GENERAL',
+        'APP': 'CONSULTA_GENERAL',
+        'MAPA': 'CONSULTA_GENERAL',
+    }
+    intencion_valida = mapa_intenciones.get(intencion.upper(), 'CONSULTA_GENERAL')
+
     conn = conectar()
     if not conn:
         return
@@ -46,9 +71,9 @@ def guardar_historial(comando, respuesta, intencion="CONSULTA_GENERAL"):
                     """INSERT INTO historial_interacciones
                     (usuario_id, dispositivo_id, comando_original, respuesta_frank, intencion_detectada)
                     VALUES (%s, %s, %s, %s, %s)""",
-                    (USUARIO_ID, DISPOSITIVO_ID, comando, respuesta, intencion)
+                    (USUARIO_ID, DISPOSITIVO_ID, comando, respuesta, intencion_valida)
                 )
-        log.debug("Historial guardado: intención=%s", intencion)
+        log.debug("Historial guardado: intención=%s (original=%s)", intencion_valida, intencion)
     except Exception as e:
         log.error("Error guardando historial: %s", e)
 
