@@ -1,0 +1,24 @@
+# PROTOCOLOS DE FRANK
+# ==================
+# Los protocolos son macros/atajos que Frank ejecuta SIN pasar por la IA.
+# Son instantáneos y privados.
+#
+# FORMATO: CÓDIGO | DESCRIPCIÓN | ACCIÓN A EJECUTAR
+#
+# - CÓDIGO:       palabra o número corto que activa el protocolo (ej: 001, gym, foco)
+#                 Frank lo detecta cuando aparece en tu frase.
+# - DESCRIPCIÓN:  explicación tuya de lo que hace (solo para referencia).
+# - ACCIÓN:       texto exacto como si se lo dictaras a Frank normalmente.
+#
+# EJEMPLOS:
+# 001 | Música de enfoque/estudio    | reproduce la lista 01
+# 002 | Playlist del gym             | reproduce la lista gym
+# 003 | Abrir YouTube                | abre youtube.com
+# mañana | Rutina de mañana completa | reproduce la lista mañana
+#
+# ============================================================
+# AGREGA TUS PROTOCOLOS AQUÍ (quita el # del inicio):
+# ============================================================
+#
+# 001 | Música de enfoque | reproduce la lista 01
+# 002 | Playlist del gym  | reproduce la lista 02

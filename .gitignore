@@ -1,0 +1,22 @@
+# Entorno virtual (nunca subir al repo - son cientos de MB)
+Asistente/frank_env/
+
+# Variables de entorno (contienen contraseñas y API keys)
+Asistente/.env
+
+# Logs generados en ejecución
+Asistente/frank.log
+*.log
+
+# PyWhatKit DB (contiene números de teléfono reales)
+Asistente/PyWhatKit_DB.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.vscode/
+.idea/
