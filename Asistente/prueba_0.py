@@ -226,11 +226,13 @@ def abrir_carpeta_de_musica(clave):
                     random.shuffle(archivos)
                     
                     # Creamos el archivo de lista de reproducción (.m3u)
-                    playlist_path = os.path.join(ruta, "lista_frank.m3u")
+                    playlist_path = os.path.join(ruta, "lista_frank.m3u8")
                     
                     with open(playlist_path, "w", encoding="utf-8") as f:
                         for cancion in archivos:
-                            f.write(os.path.join(ruta, cancion) + "\n")
+                            # Aseguramos ruta absoluta completa
+                            ruta_completa = os.path.join(ruta, cancion)
+                            f.write(ruta_completa + "\n")
                     
                     # Abrimos el archivo de lista de reproducción
                     os.startfile(playlist_path)
@@ -253,7 +255,7 @@ def abrir_carpeta_de_musica(clave):
 
 def extraer_clave_de_musica(clave):
     prompt = (
-        f"Analiza la orden: '{comando}'. "
+        f"Analiza la orden: '{clave}'. "
         "El usuario quiere reproducir una lista de música. "
         "Extrae únicamente el código o clave de la lista (ejemplo: 00, 01, relax). "
         "Responde solo con la clave, sin puntos ni texto extra."

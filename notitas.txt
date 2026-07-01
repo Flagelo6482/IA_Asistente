@@ -1,0 +1,57 @@
+NVIDIA GerForce RX 3060 Ti(8 GB), Intel(R) UHD Graphics 770 (128 MB)
+
+
+
+
+
+
+
+
+
+
+
+LLM: programa de IA para reconocer y generar texto(Para la comunicación entre el asistente y usuario), ademas de tomar decisiones segun el usuario consulte, como indicas que ollama crea un pequeño servidor dentro de la pc, permite que otros dispositivos se conecten en mi red como otro dispositivo Raspeberry, celular local, y entre otras cosas
+
+
+
+Funcionalidades:
+-enviar mensajes por wasap, correos
+-control del sistema, capacidades para apagar la pc, subir volumen o abrir programas
+-integracion de calendario con la api de google calendar o un calendario hecho por mi
+
+
+
+
+Pendiente:
+-Crear tablas para memoria sensorial, ejemplo "Si escuchas mucho Nirvana a las 6:00 PM, Frank debe notar el patrón y preguntarte: "¿Pongo la música de entrenamiento?"
+Rastrear los animales, lugares, condiciones, estado, etc
+Leer documentos(RAG) para que me de respuestas o resumenes y ahorrar tiempo y no solo en internet
+-Tener codigos de seguridad(casos especiales/emergencia), codigo 001(reproducir lista de musica 01), codigo 002(reportar estados de los animales), a futuro serán codigos mediante "movimientos de dedos"
+-Vision artificial, detectarme principalmente a mi(logica de arc_facial, para la seguridad)
+-Deteccion de palabras de emergencia, activación, espera, etc
+-Funcionalidades con el raspberry, por ejemplo encender la luz, activar las camaras, sensores de temperatura
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
