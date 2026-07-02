@@ -1,4 +1,5 @@
 import asyncio
+import ctypes
 import logging
 import os
 import random
@@ -34,11 +35,8 @@ except ImportError:
     log.warning("edge-tts no está instalado. Usando pyttsx3 (voz robótica). "
                 "Instala con: pip install edge-tts playsound")
 
-try:
-    from playsound import playsound as _playsound
-    _PLAYSOUND_DISPONIBLE = True
-except ImportError:
-    _PLAYSOUND_DISPONIBLE = False
+# playsound eliminado por incompatibilidad con Python 3.14. Se usa MCI winmm.dll de forma nativa.
+_PLAYSOUND_DISPONIBLE = False
 
 
 # ============================================ #
@@ -50,6 +48,19 @@ async def _generar_audio_edge(texto: str, voz: str, ruta: str):
     await communicate.save(ruta)
 
 
+def _reproducir_mp3_win32(ruta_audio: str) -> bool:
+    """Reproduce un archivo MP3 de forma nativa en Windows usando la API MCI (winmm.dll) sin dependencias."""
+    try:
+        ruta_normalizada = os.path.normpath(ruta_audio)
+        # Usar alias para controlar la reproducción de forma segura
+        ctypes.windll.winmm.mciSendStringW(f'open "{ruta_normalizada}" type mpegvideo alias frank_audio', None, 0, 0)
+        ctypes.windll.winmm.mciSendStringW('play frank_audio wait', None, 0, 0)
+        ctypes.windll.winmm.mciSendStringW('close frank_audio', None, 0, 0)
+        return True
+    except Exception as e:
+        log.warning("Fallo en reproducción nativa Win32: %s", e)
+        return False
+
 def _hablar_edge(texto: str) -> bool:
     """Intenta hablar con edge-tts. Devuelve False si falla (sin internet o error)."""
     try:
@@ -57,11 +68,12 @@ def _hablar_edge(texto: str) -> bool:
             ruta_audio = f.name
         asyncio.run(_generar_audio_edge(texto, FRANK_VOZ, ruta_audio))
 
-        if _PLAYSOUND_DISPONIBLE:
-            _playsound(ruta_audio)
-        else:
+        # Intentar reproducir con MCI de Windows nativo (sin ventanas ni procesos externos)
+        exito = _reproducir_mp3_win32(ruta_audio)
+        
+        if not exito:
+            # Fallback en caso falle la API MCI
             os.startfile(ruta_audio)
-            # Pausa aproximada según longitud del texto
             time.sleep(max(2.0, len(texto) * 0.055))
 
         try:
